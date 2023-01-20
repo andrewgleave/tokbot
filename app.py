@@ -142,4 +142,4 @@ with block:
         outputs=[agent_state],
     )
 
-block.launch(debug=True)
+block.launch()
