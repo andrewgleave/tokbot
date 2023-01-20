@@ -14,7 +14,11 @@ from chain import get_chain
 
 STORE_DIR = "store"
 YOUTUBE_EMBED_TEMPLATE = """
-<iframe width="354" height="200" src="{source}" title="YouTube video player" frameborder="0" 
+<iframe width="354"
+    height="200"
+    src="{source}&cc_load_policy=1"
+    title="YouTube video player"
+    frameborder="0"
     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
 </iframe>"""
 
@@ -80,8 +84,11 @@ def chat(inp, history, agent):
     return history, history, source_html
 
 
-block = gr.Blocks(css=".gradio-container {background-color: lightgray}")
-with block:
+with gr.Blocks(css=".gradio-container {background-color: lightgray}") as demo:
+
+    state = gr.State()
+    agent_state = gr.State()
+
     gr.Markdown("<h3><center>ToKBot🤖 - Ask ToKCast Questions</center></h3>")
     openai_api_key_textbox = gr.Textbox(
         placeholder="Paste your OpenAI API key (sk-...)",
@@ -90,13 +97,8 @@ with block:
         type="password",
     )
 
+    sources = gr.HTML()
     chatbot = gr.Chatbot()
-    gr.Markdown("<h3>Excerpts</h3>")
-    sources = gr.HTML(
-        """<div style="min-height:200px;display:flex;align-items:center;justify-content:center;">
-            <h3 style="text-align:center;color:#555;font-size:2rem;">No videos</h3>
-        </div>"""
-    )
     with gr.Row():
         message = gr.Textbox(
             label="What's your question?",
@@ -107,23 +109,20 @@ with block:
 
     gr.Examples(
         examples=[
-            "What is a beginning of infinity?",
-            "How do memes differ from genes in how they replicate?",
+            'What does "the beginning of infinity" refer to?',
+            "How do memes differ from genes in their replication?",
             "What is the nature of knowledge and how does it grow?",
         ],
         inputs=message,
     )
 
     gr.HTML(
-        """A GPT-3/LangChain bot that answers questions about the TokCast podcast provides relevant video excerpts"""
+        """<p>A GPT-3/LangChain bot that answers questions about the TokCast podcast provides relevant video excerpts</p>"""
     )
 
     gr.HTML(
         "<center>Powered by <a href='https://github.com/hwchase17/langchain'>LangChain 🦜️🔗</a></center>"
     )
-
-    state = gr.State()
-    agent_state = gr.State()
 
     submit.click(
         chat,
@@ -142,4 +141,4 @@ with block:
         outputs=[agent_state],
     )
 
-block.launch()
+demo.launch()

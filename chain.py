@@ -6,9 +6,8 @@ from langchain.chains.base import Chain
 from langchain.chains.combine_documents.base import BaseCombineDocumentsChain
 from langchain.chains.question_answering import load_qa_chain
 from langchain.prompts import FewShotPromptTemplate
-
-# from langchain.prompts.example_selector import SemanticSimilarityExampleSelector
 from langchain.vectorstores import FAISS
+
 from pydantic import BaseModel
 
 
@@ -33,20 +32,18 @@ class CustomChain(Chain, BaseModel):
             new_question = self.key_word_extractor.run(
                 question=question, chat_history=chat_history_str
             )
-
         else:
             new_question = question
-        docs = self.vstore.similarity_search(new_question, k=3)
+        docs = self.vstore.similarity_search(new_question, k=4)
         new_inputs = inputs.copy()
         new_inputs["question"] = new_question
         new_inputs["chat_history"] = chat_history_str
         answer, _ = self.chain.combine_docs(docs, **new_inputs)
-        sources = ""
+        sources = []
         if "SOURCES:" in answer:
             answer, sources = answer.split("SOURCES:")
-        sources = sources.split(", ")
-        answer = answer.strip()
-        return {"answer": answer, "sources": sources}
+            sources = sources.split(", ")
+        return {"answer": answer.strip(), "sources": sources}
 
 
 def get_chain(vectorstore: FAISS) -> Chain:
@@ -68,10 +65,6 @@ def get_chain(vectorstore: FAISS) -> Chain:
     {chat_history}
     Follow Up Input: {question}
     Standalone question:"""
-    # example_selector = SemanticSimilarityExampleSelector(
-    #     vectorstore=vectorstore,
-    #     k=4,
-    # )
 
     examples = [
         {
@@ -121,13 +114,9 @@ ANSWER:"""
         chain_type="stuff",
         prompt=PROMPT,
         document_prompt=EXAMPLE_PROMPT,
-        verbose=True,
     )
     return CustomChain(
-        chain=doc_chain,
-        vstore=vectorstore,
-        key_word_extractor=key_word_extractor,
-        verbose=True,
+        chain=doc_chain, vstore=vectorstore, key_word_extractor=key_word_extractor
     )
 
 
