@@ -2,6 +2,7 @@ import json
 import os
 from pathlib import Path
 
+import faiss
 from langchain.docstore.document import Document
 from langchain.docstore.in_memory import InMemoryDocstore
 from langchain.embeddings import OpenAIEmbeddings
@@ -22,11 +23,6 @@ def load_store():
     def keys_to_int(x):
         return {int(k): v for k, v in x.items()}
 
-    def _read_index(path):
-        import faiss
-
-        return faiss.read_index(str(path))
-
     index_path = list(Path(STORE_DIR).glob("*.faiss"))
     if len(index_path) == 0:
         raise ValueError("No index found in path")
@@ -43,7 +39,7 @@ def load_store():
     embeddings = OpenAIEmbeddings()
     return FAISS(
         embedding_function=embeddings.embed_query,
-        index=_read_index(index_path),
+        index=faiss.read_index(str(index_path)),
         docstore=InMemoryDocstore(
             {index_to_id[i]: Document(**doc) for i, doc in enumerate(docs.values())}
         ),
@@ -67,7 +63,7 @@ def _to_embed(link):
 def chat(inp, history, agent):
     history = history or []
     if agent is None:
-        history.append((inp, "Please paste your OpenAI key to use"))
+        history.append((inp, "Please paste your OpenAI key"))
         return history, history
     output = agent({"question": inp, "chat_history": history})
     answer = output["answer"]
