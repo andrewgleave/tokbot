@@ -68,11 +68,6 @@ def get_chain(vectorstore: FAISS) -> Chain:
 
     examples = [
         {
-            "question": "What is the TokCast podcast?",
-            "chat_history": [],
-            "answer": "TokCast is a podcast about the philosophy of David Deutsch.",
-        },
-        {
             "question": "Who is that?",
             "chat_history": "Human: What is the TokCast podcast?\nAssistant: TokCast is a podcast about the philosophy of David Deutsch.",
             "answer": "Who is David Deutsch?",
@@ -92,7 +87,7 @@ def get_chain(vectorstore: FAISS) -> Chain:
         input_variables=["question", "chat_history"],
     )
     llm = OpenAI(temperature=0, model_name="text-davinci-003")
-    key_word_extractor = LLMChain(llm=llm, prompt=prompt, verbose=True)
+    key_word_extractor = LLMChain(llm=llm, prompt=prompt)
 
     EXAMPLE_PROMPT = PromptTemplate(
         template="CONTENT:\n{page_content}\n----------\nSOURCE:\n{source}\n",

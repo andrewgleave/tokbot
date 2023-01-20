@@ -84,7 +84,7 @@ def chat(inp, history, agent):
     return history, history, source_html
 
 
-with gr.Blocks(css=".gradio-container {background-color: lightgray}") as demo:
+with gr.Blocks() as demo:
 
     state = gr.State()
     agent_state = gr.State()
@@ -98,7 +98,7 @@ with gr.Blocks(css=".gradio-container {background-color: lightgray}") as demo:
     )
 
     sources = gr.HTML()
-    chatbot = gr.Chatbot()
+    chatbot = gr.Chatbot().style(color_map=("blue", "gray"))
     with gr.Row():
         message = gr.Textbox(
             label="What's your question?",
